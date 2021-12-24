@@ -1,0 +1,22 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.1'
+    id 'java'
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+group 'fr.pearl.core'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    implementation files('../PearlAPI/build/libs/PearlAPI-1.0-SNAPSHOT-all.jar')
+}
+
+artifacts {
+    archives shadowJar
+}
