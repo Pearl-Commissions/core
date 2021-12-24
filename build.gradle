@@ -11,10 +11,26 @@ version '1.0-SNAPSHOT'
 repositories {
     mavenCentral()
     mavenLocal()
+
+    flatDir {
+        dir "libs"
+    }
 }
 
 dependencies {
     implementation files('../PearlAPI/build/libs/PearlAPI-1.0-SNAPSHOT-all.jar')
+    compileOnly name: 'bungeecord'
+    compileOnly name: 'spigot-1.8.8'
+    compileOnly name: 'spigot-1.9.4'
+    compileOnly name: 'spigot-1.10.2'
+    compileOnly name: 'spigot-1.11.2'
+    compileOnly name: 'spigot-1.12.2'
+    compileOnly name: 'spigot-1.13.2'
+    compileOnly name: 'spigot-1.14.4'
+    compileOnly name: 'spigot-1.15.2'
+    compileOnly name: 'spigot-1.16.5'
+    compileOnly name: 'spigot-1.17.1'
+    compileOnly name: 'spigot-1.18.1'
 }
 
 artifacts {
