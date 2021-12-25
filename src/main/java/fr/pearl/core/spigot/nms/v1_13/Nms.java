@@ -3,8 +3,9 @@ package fr.pearl.core.spigot.nms.v1_13;
 import fr.pearl.api.spigot.nms.PearlNms;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
-import net.minecraft.server.v1_13_R2.EntityPlayer;
+import net.minecraft.server.v1_13_R2.*;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_13_R2.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 
 public class Nms implements PearlNms<EntityPlayer> {
@@ -19,6 +20,16 @@ public class Nms implements PearlNms<EntityPlayer> {
         Channel channel = this.getEntityPlayer(player).playerConnection.networkManager.channel;
         ChannelHandler handler = channel.pipeline().get("pearl-handler");
         if (handler != null) channel.pipeline().remove(handler);
+    }
+
+    @Override
+    public void sendPacket(Player player, Object object) {
+        getEntityPlayer(player).playerConnection.sendPacket((Packet<?>) object);
+    }
+
+    @Override
+    public void setListName(Player player, String listName) {
+        getEntityPlayer(player).listName = CraftChatMessage.fromString(listName)[0];
     }
 
     @Override
