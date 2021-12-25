@@ -29,8 +29,6 @@ dependencies {
     compileOnly name: 'spigot-1.14.4'
     compileOnly name: 'spigot-1.15.2'
     compileOnly name: 'spigot-1.16.5'
-    compileOnly name: 'spigot-1.17.1'
-    compileOnly name: 'spigot-1.18.1'
 }
 
 artifacts {
