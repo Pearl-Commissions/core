@@ -19,6 +19,7 @@ public class PacketManager implements PearlPacketManager {
 
     private final List<PacketHandler> packetHandlers = new ArrayList<>();
     private final Map<Class<? extends PacketServer>, PacketServer> serverPackets = new HashMap<>();
+    private final Map<Class<?>, PacketServer> objectToPacketMap = new HashMap<>();
 
     public PacketManager() {
         String version = PearlSpigot.getInstance().getNmsManager().getVersion().name().toLowerCase();
@@ -29,6 +30,7 @@ public class PacketManager implements PearlPacketManager {
                             .asSubclass(PacketServer.class)
             );
             serverPackets.put(packetClass, server);
+            objectToPacketMap.put(server.packetClass(), server);
         }
 
         Bukkit.getOnlinePlayers().forEach(player -> this.addPlayer(player, true));
@@ -48,6 +50,12 @@ public class PacketManager implements PearlPacketManager {
     @SuppressWarnings("unchecked")
     public <T extends PacketServer> T getPacket(Class<? extends PacketServer> packetClass) {
         return (T) this.serverPackets.get(packetClass);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends PacketServer> T convertPacket(Object object) {
+        return (T) this.objectToPacketMap.get(object.getClass());
     }
 
     public void addPlayer(Player player, boolean remove) {

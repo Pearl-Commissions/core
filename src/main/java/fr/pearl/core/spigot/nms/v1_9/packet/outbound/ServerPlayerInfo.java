@@ -59,4 +59,9 @@ public class ServerPlayerInfo implements NmsPacketServerPlayerInfo {
         this.entityPlayers = null;
         return info;
     }
+
+    @Override
+    public Class<?> packetClass() {
+        return PacketPlayOutPlayerInfo.class;
+    }
 }
