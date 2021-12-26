@@ -1,6 +1,8 @@
 package fr.pearl.core.spigot.nms.v1_15;
 
 import fr.pearl.api.spigot.nms.PearlNms;
+import fr.pearl.api.spigot.nms.scoreboard.NmsScoreboard;
+import fr.pearl.core.spigot.nms.v1_15.scoreboard.Scoreboard;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.minecraft.server.v1_15_R1.*;
@@ -30,6 +32,11 @@ public class Nms implements PearlNms<EntityPlayer> {
     @Override
     public void setListName(Player player, String listName) {
         getEntityPlayer(player).listName = CraftChatMessage.fromString(listName)[0];
+    }
+
+    @Override
+    public NmsScoreboard<ScoreboardServer> createScoreboard() {
+        return new Scoreboard();
     }
 
     @Override

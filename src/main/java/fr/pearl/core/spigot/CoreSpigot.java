@@ -6,6 +6,7 @@ import fr.pearl.api.spigot.packet.PearlPacketManager;
 import fr.pearl.core.spigot.listener.ConnectionListener;
 import fr.pearl.core.spigot.nms.NmsManager;
 import fr.pearl.core.spigot.packet.PacketManager;
+import org.bukkit.Bukkit;
 
 public class CoreSpigot extends PearlSpigot {
 

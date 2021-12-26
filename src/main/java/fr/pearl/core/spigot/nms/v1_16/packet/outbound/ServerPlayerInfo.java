@@ -1,7 +1,7 @@
 package fr.pearl.core.spigot.nms.v1_16.packet.outbound;
 
 import fr.pearl.api.spigot.packet.registry.outbound.NmsPacketServerPlayerInfo;
-import fr.pearl.api.spigot.packet.registry.util.PlayerInfoType;
+import fr.pearl.api.spigot.packet.registry.enums.PlayerInfoType;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
 import net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
