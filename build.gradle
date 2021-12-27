@@ -1,36 +1,57 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:5.0.0'
+    }
+}
+
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.1'
     id 'java'
 }
 
-compileJava.options.encoding = 'UTF-8'
+subprojects { p ->
+    apply plugin: 'java'
+    apply plugin: 'com.github.johnrengelman.shadow'
 
-group 'fr.pearl.core'
-version '1.0-SNAPSHOT'
+    group 'fr.pearl.core'
+    version '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-    mavenLocal()
+    compileJava.options.encoding = 'UTF-8'
 
-    flatDir {
-        dir "libs"
+    repositories {
+        mavenCentral()
+        mavenLocal()
+
+        flatDir {
+            dir "lib"
+        }
+    }
+
+    dependencies {
+        if (p.name != 'api') {
+            implementation project(':api')
+            if (p.name == 'bungee') {
+                compileOnly name: 'bungee'
+            } else if (p.name == 'spigot') {
+                compileOnly 'io.netty:netty-all:4.1.63.Final'
+            } else if (p.name != 'all'){
+                implementation project(':spigot')
+                compileOnly name: 'spigot'
+            }
+        }
+    }
+
+    artifacts {
+        archives shadowJar
     }
 }
 
 dependencies {
-    implementation files('../PearlAPI/build/libs/PearlAPI-1.0-SNAPSHOT-all.jar')
-    compileOnly name: 'bungeecord'
-    compileOnly name: 'spigot-1.8.8'
-    compileOnly name: 'spigot-1.9.4'
-    compileOnly name: 'spigot-1.10.2'
-    compileOnly name: 'spigot-1.11.2'
-    compileOnly name: 'spigot-1.12.2'
-    compileOnly name: 'spigot-1.13.2'
-    compileOnly name: 'spigot-1.14.4'
-    compileOnly name: 'spigot-1.15.2'
-    compileOnly name: 'spigot-1.16.5'
-}
-
-artifacts {
-    archives shadowJar
+    implementation project(':spigot')
+    implementation project (':bungee')
+    implementation project(':1.8')
 }

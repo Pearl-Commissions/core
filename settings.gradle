@@ -1,2 +1,16 @@
 rootProject.name = 'PearlCore'
 
+include 'spigot'
+include 'bungee'
+include '1.8'
+include '1.9'
+include '1.10'
+include '1.11'
+include '1.12'
+include '1.13'
+include '1.14'
+include '1.15'
+include '1.16'
+include 'all'
+include 'api'
+

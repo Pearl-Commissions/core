@@ -1,0 +1,5 @@
+name: PearlCore
+version: 1.0
+api-version: 13
+author: Bramsou
+main: fr.pearl.core.spigot.CoreSpigot

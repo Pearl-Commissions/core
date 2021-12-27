@@ -1,6 +1,6 @@
 .idea
 *.iml
 
-libs
+bungee/lib/libs
 .gradle
 build

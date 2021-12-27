@@ -1,0 +1,13 @@
+dependencies {
+    implementation project(':spigot')
+    implementation project(':bungee')
+    implementation project(':1.8')
+    implementation project(':1.9')
+    implementation project(':1.10')
+    implementation project(':1.11')
+    implementation project(':1.12')
+    implementation project(':1.13')
+    implementation project(':1.14')
+    implementation project(':1.15')
+    implementation project(':1.16')
+}
