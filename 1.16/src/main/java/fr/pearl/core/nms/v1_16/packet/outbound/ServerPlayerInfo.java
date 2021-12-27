@@ -1,6 +1,7 @@
 package fr.pearl.core.nms.v1_16.packet.outbound;
 
 import fr.pearl.api.common.util.Reflection;
+import fr.pearl.api.spigot.packet.PacketServer;
 import fr.pearl.api.spigot.packet.registry.outbound.NmsPacketServerPlayerInfo;
 import fr.pearl.api.spigot.packet.registry.enums.PlayerInfoType;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
@@ -11,6 +12,7 @@ import org.bukkit.entity.Player;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.function.Supplier;
 
 public class ServerPlayerInfo implements NmsPacketServerPlayerInfo {
 
@@ -77,5 +79,9 @@ public class ServerPlayerInfo implements NmsPacketServerPlayerInfo {
     @Override
     public void setValues(Object packet) {
         this.infoAction = Reflection.get(actionField, packet);
+    }
+
+    public static Supplier<PacketServer> getSupplier() {
+        return ServerPlayerInfo::new;
     }
 }

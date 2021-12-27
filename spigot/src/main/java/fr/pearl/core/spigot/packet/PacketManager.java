@@ -14,23 +14,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class PacketManager implements PearlPacketManager {
 
     private final List<PacketHandler> packetHandlers = new ArrayList<>();
-    private final Map<Class<? extends PacketServer>, PacketServer> serverPackets = new HashMap<>();
-    private final Map<Class<?>, PacketServer> objectToPacketMap = new HashMap<>();
+    private final Map<Class<? extends PacketServer>, Supplier<PacketServer>> serverPackets = new HashMap<>();
+    private final Map<Class<?>, Supplier<PacketServer>> objectToPacketMap = new HashMap<>();
 
     public PacketManager() {
         String version = PearlSpigot.getInstance().getNmsManager().getVersion().name().toLowerCase();
         for (ServerRegistry registry : ServerRegistry.values()) {
             Class<? extends PacketServer> packetClass = registry.getPacketClass();
-            PacketServer server = Reflection.newInstance(
-                    Reflection.forName("fr.pearl.core.spigot.nms." + version + ".packet.outbound." + packetClass.getSimpleName().replace("NmsPacket", ""))
-                            .asSubclass(PacketServer.class)
-            );
-            serverPackets.put(packetClass, server);
-            objectToPacketMap.put(server.packetClass(), server);
+            Class<? extends PacketServer> clazz = Reflection.forName(
+                    "fr.pearl.core.spigot.nms." + version + ".packet.outbound." + packetClass.getSimpleName().replace("NmsPacket", "")
+                    ).asSubclass(PacketServer.class);
+            Supplier<PacketServer> consumer = Reflection.invoke(Reflection.accessMethod(clazz, "getSupplier"), null);
+            serverPackets.put(packetClass, consumer);
+            objectToPacketMap.put(consumer.get().packetClass(), consumer);
         }
 
         Bukkit.getOnlinePlayers().forEach(player -> this.addPlayer(player, true));
@@ -49,7 +51,7 @@ public class PacketManager implements PearlPacketManager {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends PacketServer> T getPacket(Class<? extends PacketServer> packetClass) {
-        return (T) this.serverPackets.get(packetClass);
+        return (T) this.serverPackets.get(packetClass).get();
     }
 
     @Override
@@ -60,7 +62,7 @@ public class PacketManager implements PearlPacketManager {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends PacketServer> T convertPacket(Object packet, boolean fillValues) {
-        T packetServer = (T) this.objectToPacketMap.get(packet.getClass());
+        T packetServer = (T) this.objectToPacketMap.get(packet.getClass()).get();
         if (fillValues) {
             packetServer.setValues(packet);
         }

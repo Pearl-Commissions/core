@@ -1,9 +1,12 @@
 package fr.pearl.core.nms.v1_15.packet.outbound;
 
 import fr.pearl.api.spigot.nms.scoreboard.NmsObjective;
+import fr.pearl.api.spigot.packet.PacketServer;
 import fr.pearl.api.spigot.packet.registry.outbound.NmsPacketServerScoreboardObjective;
 import net.minecraft.server.v1_15_R1.PacketPlayOutScoreboardObjective;
 import net.minecraft.server.v1_15_R1.ScoreboardObjective;
+
+import java.util.function.Supplier;
 
 public class ServerScoreboardObjective implements NmsPacketServerScoreboardObjective {
 
@@ -31,5 +34,9 @@ public class ServerScoreboardObjective implements NmsPacketServerScoreboardObjec
     @Override
     public Class<?> packetClass() {
         return PacketPlayOutScoreboardObjective.class;
+    }
+
+    public static Supplier<PacketServer> getSupplier() {
+        return ServerScoreboardObjective::new;
     }
 }

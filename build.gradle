@@ -49,9 +49,3 @@ subprojects { p ->
         archives shadowJar
     }
 }
-
-dependencies {
-    implementation project(':spigot')
-    implementation project (':bungee')
-    implementation project(':1.8')
-}
