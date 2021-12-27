@@ -45,6 +45,19 @@ subprojects { p ->
         }
     }
 
+    shadowJar {
+        exclude 'com/cryptomorin/xseries/unused/**'
+        exclude 'com/cryptomorin/xseries/messages/*'
+        exclude 'com/cryptomorin/xseries/XBiome*'
+        exclude 'com/cryptomorin/xseries/NMSExtras*'
+        exclude 'com/cryptomorin/xseries/NoteBlockMusic*'
+        exclude 'com/cryptomorin/xseries/SkullUtils*'
+        exclude 'com/cryptomorin/xseries/XEntity*'
+        exclude 'com/cryptomorin/xseries/XBlock*'
+
+        relocate 'com.cryptomorin.xseries', 'fr.pearl.api.libs.xseries'
+    }
+
     artifacts {
         archives shadowJar
     }
