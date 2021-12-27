@@ -53,14 +53,18 @@ public class PacketManager implements PearlPacketManager {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T extends PacketServer> T convertPacket(Object object) {
-        return (T) this.objectToPacketMap.get(object.getClass());
+    public <T extends PacketServer> T convertPacket(Object packet) {
+        return convertPacket(packet, true);
     }
 
     @Override
-    public <T extends PacketServer> T convertPacket(Object o, boolean b) {
-        return null;
+    @SuppressWarnings("unchecked")
+    public <T extends PacketServer> T convertPacket(Object packet, boolean fillValues) {
+        T packetServer = (T) this.objectToPacketMap.get(packet.getClass());
+        if (fillValues) {
+            packetServer.setValues(packet);
+        }
+        return packetServer;
     }
 
     public void addPlayer(Player player, boolean remove) {
