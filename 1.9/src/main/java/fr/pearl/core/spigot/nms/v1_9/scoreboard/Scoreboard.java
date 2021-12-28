@@ -5,26 +5,24 @@ import fr.pearl.api.spigot.nms.scoreboard.NmsScoreboard;
 import fr.pearl.api.spigot.nms.scoreboard.NmsTeam;
 import net.minecraft.server.v1_9_R2.*;
 
-public class Scoreboard implements NmsScoreboard<ScoreboardServer> {
-
-    private final ScoreboardServer scoreboardServer;
+public class Scoreboard extends ScoreboardServer implements NmsScoreboard<ScoreboardServer> {
 
     public Scoreboard() {
-        this.scoreboardServer = new ScoreboardServer(MinecraftServer.getServer());
+        super(MinecraftServer.getServer());
     }
 
     @Override
     public ScoreboardServer getScoreboardServer() {
-        return this.scoreboardServer;
+        return this;
     }
 
     @Override
     public NmsObjective<ScoreboardObjective> createObjective(String name, String criteria) {
-        return new Objective(name, this.scoreboardServer, IScoreboardCriteria.criteria.get(criteria));
+        return new Objective(name, this, IScoreboardCriteria.criteria.get(criteria));
     }
 
     @Override
-    public NmsTeam<ScoreboardTeam> createTeam(String s) {
-        return null;
+    public NmsTeam<ScoreboardTeam> createNewTeam(String teamName) {
+        return new Team(this, teamName);
     }
 }

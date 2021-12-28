@@ -3,32 +3,31 @@ package fr.pearl.core.spigot.nms.v1_17.scoreboard;
 import fr.pearl.api.spigot.nms.scoreboard.NmsObjective;
 import fr.pearl.api.spigot.nms.scoreboard.NmsScoreboard;
 import fr.pearl.api.spigot.nms.scoreboard.NmsTeam;
+import net.minecraft.network.protocol.game.PacketPlayOutScoreboardScore;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ScoreboardServer;
 import net.minecraft.world.scores.ScoreboardObjective;
 import net.minecraft.world.scores.ScoreboardTeam;
 import net.minecraft.world.scores.criteria.IScoreboardCriteria;
 
-public class Scoreboard implements NmsScoreboard<ScoreboardServer> {
-
-    private final ScoreboardServer scoreboardServer;
+public class Scoreboard extends ScoreboardServer implements NmsScoreboard<ScoreboardServer> {
 
     public Scoreboard() {
-        this.scoreboardServer = new ScoreboardServer(MinecraftServer.getServer());
+        super(MinecraftServer.getServer());
     }
 
     @Override
     public ScoreboardServer getScoreboardServer() {
-        return this.scoreboardServer;
+        return this;
     }
 
     @Override
     public NmsObjective<ScoreboardObjective> createObjective(String name, String criteria) {
-        return new Objective(name, this.scoreboardServer, IScoreboardCriteria.o.get(criteria));
+        return new Objective(name, this, IScoreboardCriteria.o.get(criteria));
     }
 
     @Override
-    public NmsTeam<ScoreboardTeam> createTeam(String s) {
-        return null;
+    public NmsTeam<ScoreboardTeam> createNewTeam(String teamName) {
+        return new Team(this, teamName);
     }
 }
