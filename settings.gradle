@@ -1,5 +1,6 @@
 rootProject.name = 'PearlCore'
 
+include 'api'
 include 'spigot'
 include 'bungee'
 include '1.8'
@@ -11,6 +12,7 @@ include '1.13'
 include '1.14'
 include '1.15'
 include '1.16'
+include '1.17'
+
 include 'all'
-include 'api'
 

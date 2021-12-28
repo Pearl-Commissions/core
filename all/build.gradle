@@ -10,4 +10,5 @@ dependencies {
     implementation project(':1.14')
     implementation project(':1.15')
     implementation project(':1.16')
+    implementation project(':1.17')
 }
