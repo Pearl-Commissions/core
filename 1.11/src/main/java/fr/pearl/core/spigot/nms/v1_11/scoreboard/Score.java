@@ -38,4 +38,9 @@ public class Score extends ScoreboardScore implements NmsScore<ScoreboardScore> 
     public String getPlayerName() {
         return this.name;
     }
+
+    @Override
+    public ScoreboardScore getServerScore() {
+        return this;
+    }
 }
