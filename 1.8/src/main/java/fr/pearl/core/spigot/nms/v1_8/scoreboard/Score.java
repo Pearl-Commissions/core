@@ -11,6 +11,7 @@ public class Score extends ScoreboardScore implements NmsScore<ScoreboardScore> 
     public Score(ScoreboardServer scoreboard, ScoreboardObjective objective, String name, int score) {
         super(scoreboard, objective, name);
 
+        this.name = name;
         this.score = score;
     }
 
