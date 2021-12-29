@@ -25,10 +25,7 @@ public class ServerScoreboardObjective implements NmsPacketServerScoreboardObjec
 
     @Override
     public Object getPacket() {
-        PacketPlayOutScoreboardObjective packet = new PacketPlayOutScoreboardObjective(this.objective, this.type);
-        this.objective = null;
-        this.type = 0;
-        return packet;
+        return new PacketPlayOutScoreboardObjective(this.objective, this.type);
     }
 
     @Override
