@@ -56,8 +56,8 @@ public class Team extends ScoreboardTeam implements NmsTeam<ScoreboardTeam> {
     }
 
     @Override
-    public void setPlayer(Player player) {
-        this.playerNames = Collections.singleton(player.getName());
+    public void setPlayerName(String playerName) {
+        this.playerNames = Collections.singleton(playerName);
     }
 
     @Override
@@ -69,13 +69,13 @@ public class Team extends ScoreboardTeam implements NmsTeam<ScoreboardTeam> {
     }
 
     @Override
-    public void addPlayer(Player player) {
-        this.getPlayerNameSet().add(player.getName());
+    public void addName(String playerName) {
+        this.getPlayerNameSet().add(playerName);
     }
 
     @Override
-    public void removePlayer(Player player) {
-        this.getPlayerNameSet().remove(player.getName());
+    public void removeName(String playerName) {
+        this.getPlayerNameSet().remove(playerName);
     }
 
     @Override
