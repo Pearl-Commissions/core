@@ -38,14 +38,16 @@ subprojects { p ->
     dependencies {
         if (p.name != 'api') {
             implementation project(':api')
-            if (p.name == 'bungee') {
-                compileOnly name: 'bungee'
+            if (p.name == 'bungee' || p.name == 'common') {
+                compileOnly files('../lib/bungee.jar')
             } else if (p.name == 'spigot') {
                 compileOnly 'io.netty:netty-all:4.1.63.Final'
-            } else if (p.name != 'all'){
+            } else if (p.name != 'all') {
                 implementation project(':spigot')
                 compileOnly name: 'spigot'
             }
+        } else {
+            compileOnly files('../lib/bungee.jar')
         }
     }
 

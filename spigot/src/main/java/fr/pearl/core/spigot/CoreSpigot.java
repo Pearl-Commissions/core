@@ -4,6 +4,7 @@ import fr.pearl.api.spigot.PearlSpigot;
 import fr.pearl.api.spigot.nms.PearlNmsManager;
 import fr.pearl.api.spigot.packet.PearlPacketManager;
 import fr.pearl.api.spigot.sidebar.PearlSidebarManager;
+import fr.pearl.core.common.CoreAPI;
 import fr.pearl.core.spigot.listener.ConnectionListener;
 import fr.pearl.core.spigot.nms.NmsManager;
 import fr.pearl.core.spigot.packet.PacketManager;
@@ -18,6 +19,7 @@ public class CoreSpigot extends PearlSpigot {
 
     @Override
     public void onEnable() {
+        CoreAPI.enable(false);
         PearlSpigot.setInstance(this);
 
         // Managers

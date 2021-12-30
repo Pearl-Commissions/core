@@ -1,4 +1,5 @@
 dependencies {
+    implementation project(':common')
     implementation project(':spigot')
     implementation project(':bungee')
     implementation project(':1.8')
