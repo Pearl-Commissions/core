@@ -21,11 +21,6 @@ public class BungeeCommand extends Command {
 
     @Override
     public String[] getAliases() {
-        return this.commandHandler.getAliases();
-    }
-
-    @Override
-    public String getPermission() {
-        return this.commandHandler.getPermission();
+        return this.commandHandler.getAliases() == null ? super.getAliases() : this.commandHandler.getAliases();
     }
 }
