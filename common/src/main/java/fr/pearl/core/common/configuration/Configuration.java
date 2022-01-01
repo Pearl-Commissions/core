@@ -50,22 +50,6 @@ public abstract class Configuration implements PearlConfiguration {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public final <T> T get(String path, T defaultValue) {
-        Object entry = this.entries.get(path);
-        if (entry == null || entry.getClass() != defaultValue.getClass()) {
-            if (defaultValue != null) entries.put(path, defaultValue);
-            return defaultValue;
-        }
-        return (T) entry;
-    }
-
-    @Override
-    public final <T> void set(String path, T value) {
-        this.entries.put(path, value);
-    }
-
-    @Override
     public final Set<String> getKeys() {
         return this.entries.keySet();
     }

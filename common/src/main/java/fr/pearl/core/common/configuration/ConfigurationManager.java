@@ -17,7 +17,7 @@ public class ConfigurationManager implements PearlConfigurationManager {
         if (type == ConfigurationType.SIMPLE) {
             return new SimpleConfiguration(file);
         } else {
-            return null;
+            return new DynamicConfiguration(instance, file);
         }
     }
 }
