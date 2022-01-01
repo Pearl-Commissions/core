@@ -2,8 +2,11 @@ package fr.pearl.core.common.command;
 
 import fr.pearl.api.common.command.PearlCommand;
 import fr.pearl.api.common.command.PearlSender;
+import org.bukkit.util.StringUtil;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class CommandExecutor {
 
@@ -31,5 +34,31 @@ public class CommandExecutor {
         }
 
         argument.execute(sender, label, Arrays.copyOfRange(args, 1, args.length));
+    }
+
+    public static List<String> tabComplete(PearlCommand command, PearlSender sender, String label, String[] args) {
+        if (command.isPlayersOnly() && !sender.isPlayer() || command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
+            return null;
+        }
+
+        String arg0 = args.length == 0 ? "" : args[0];
+        PearlCommand argument = arg0.equals("") ? null : command.getArgumentMap().get(arg0.toLowerCase());
+
+        if (argument == null) {
+            List<String> names = new ArrayList<>();
+            for (String string : command.getArgumentMap().keySet()) {
+                if (string.startsWith(arg0)) {
+                    names.add(string);
+                }
+            }
+            List<String> tabComplete = command.tabComplete(sender, label, args);
+            if (tabComplete != null) {
+                names.addAll(tabComplete);
+            }
+
+            return names;
+        }
+
+        return tabComplete(argument, sender, label, Arrays.copyOfRange(args, 1, args.length));
     }
 }

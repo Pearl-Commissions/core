@@ -6,6 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class BukkitCommand extends Command {
     
@@ -25,5 +26,12 @@ public class BukkitCommand extends Command {
     public boolean execute(CommandSender sender, String label, String[] args) {
         CommandExecutor.execute(this.commandHandler, new BukkitSender(sender), label, args);
         return false;
+    }
+
+    @Override
+    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+        List<String> completers = CommandExecutor.tabComplete(this.commandHandler, new BukkitSender(sender), alias, args);
+        if (completers == null) return super.tabComplete(sender, alias, args);
+        return completers;
     }
 }
