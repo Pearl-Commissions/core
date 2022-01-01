@@ -1,7 +1,6 @@
 dependencies {
-    implementation project(':common')
-    implementation project(':spigot')
-    implementation project(':bungee')
+    implementation project(':api')
+    implementation project(':core')
     implementation project(':1.8')
     implementation project(':1.9')
     implementation project(':1.10')

@@ -18,7 +18,7 @@ public class CoreSpigot extends PearlSpigot {
 
     @Override
     public void onEnable() {
-        CoreAPI.enable(false);
+        new CoreAPI(false);
         PearlSpigot.setInstance(this);
 
         // Managers

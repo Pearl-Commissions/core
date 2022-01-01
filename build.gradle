@@ -30,6 +30,8 @@ subprojects { p ->
         mavenCentral()
         mavenLocal()
 
+        maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+
         flatDir {
             dir "lib"
         }
@@ -38,16 +40,16 @@ subprojects { p ->
     dependencies {
         if (p.name != 'api') {
             implementation project(':api')
-            if (p.name == 'bungee' || p.name == 'common') {
-                compileOnly files('../lib/bungee.jar')
-            } else if (p.name == 'spigot') {
-                compileOnly 'io.netty:netty-all:4.1.63.Final'
-            } else if (p.name != 'all') {
-                implementation project(':spigot')
+            if (p.name != 'all' && p.name != 'core') {
+                implementation project(':core')
                 compileOnly name: 'spigot'
+            } else {
+                compileOnly files('../lib/bungee.jar')
+                compileOnly 'org.spigotmc:spigot-api:1.17-R0.1-SNAPSHOT'
             }
         } else {
             compileOnly files('../lib/bungee.jar')
+            compileOnly 'org.spigotmc:spigot-api:1.17-R0.1-SNAPSHOT'
         }
     }
 

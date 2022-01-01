@@ -8,7 +8,7 @@ public class CoreBungee extends PearlBungee {
 
     @Override
     public void onEnable() {
-        CoreAPI.enable(true);
+        new CoreAPI(true);
         PearlBungee.setInstance(this);
     }
 }
