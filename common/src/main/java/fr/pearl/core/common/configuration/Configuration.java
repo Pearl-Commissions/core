@@ -19,11 +19,11 @@ public abstract class Configuration implements PearlConfiguration {
     protected final File file;
     protected final Map<String, Object> entries;
 
-    public Configuration(File file) {
+    public Configuration(File file, Class<?> clazz) {
         this.entries = new LinkedHashMap<>();
         Representer representer = new Representer() {
             {
-                this.representers.put(Configuration.class, data -> represent(entries));
+                this.representers.put(clazz, config -> represent(((Configuration) config).entries));
             }
         };
         DumperOptions options = new DumperOptions();
@@ -54,7 +54,7 @@ public abstract class Configuration implements PearlConfiguration {
     public final <T> T get(String path, T defaultValue) {
         Object entry = this.entries.get(path);
         if (entry == null || entry.getClass() != defaultValue.getClass()) {
-            entries.put(path, defaultValue);
+            if (defaultValue != null) entries.put(path, defaultValue);
             return defaultValue;
         }
         return (T) entry;
