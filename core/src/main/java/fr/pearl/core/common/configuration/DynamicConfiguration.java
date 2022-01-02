@@ -42,6 +42,7 @@ public class DynamicConfiguration extends Configuration {
 
     private void loadFields() {
         for (Field field : instance.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
             ConfigurationPath configPath = field.getAnnotation(ConfigurationPath.class);
             if (configPath == null) continue;
             String path = configPath.value();
