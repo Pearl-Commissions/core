@@ -1,6 +1,7 @@
 package fr.pearl.core.common.configuration;
 
 import com.google.common.base.Charsets;
+import fr.pearl.api.common.configuration.ConfigurationHeader;
 import fr.pearl.api.common.configuration.ConfigurationPart;
 import fr.pearl.api.common.configuration.ConfigurationPath;
 import fr.pearl.api.common.configuration.PearlConfiguration;
@@ -16,18 +17,26 @@ import java.util.Map;
 public class DynamicConfiguration extends Configuration {
 
     private final Object instance;
+    private final String[] header;
 
     public DynamicConfiguration(Object instance, File file) {
         super(file, DynamicConfiguration.class);
 
         this.instance = instance;
+        ConfigurationHeader configurationHeader = instance.getClass().getDeclaredAnnotation(ConfigurationHeader.class);
+        if (configurationHeader == null) {
+            this.header = new String[]{};
+        } else {
+            this.header = configurationHeader.value();
+        }
 
         this.loadFields();
     }
 
-    public DynamicConfiguration(Object instance, Configuration configuration, Map<String, Object> entries) {
+    public DynamicConfiguration(Object instance, DynamicConfiguration configuration, Map<String, Object> entries) {
         super(configuration, entries);
 
+        this.header = configuration.header;
         this.instance = instance;
     }
 
@@ -43,6 +52,7 @@ public class DynamicConfiguration extends Configuration {
                 configuration.loadFields();
                 part.setSection(configuration);
                 this.entries.put(path, new ConfigurationValue(null, configuration, comments));
+                part.loaded();
                 continue;
             }
             ConfigurationValue configValue = new ConfigurationValue(field, value, comments);
@@ -63,7 +73,14 @@ public class DynamicConfiguration extends Configuration {
 
     @Override
     public void save() {
-        List<String> lines = this.saveEntries(new ArrayList<>(), 0);
+        List<String> lines = new ArrayList<>();
+        for (String header : this.header) {
+            lines.add("# " + header);
+        }
+        if (!lines.isEmpty()) {
+            lines.add("");
+        }
+        this.saveEntries(lines, 0);
 
         if (lines.isEmpty()) return;
 
@@ -138,18 +155,23 @@ public class DynamicConfiguration extends Configuration {
         }
     }
 
-    private List<String> saveEntries(List<String> lines, int indent) {
+    private void saveEntries(List<String> lines, int indent) {
         String prefix = " ".repeat(Math.max(0, indent));
+        int parts = 0;
         for (Map.Entry<String, Object> entry : this.entries.entrySet()) {
             String path = entry.getKey();
             ConfigurationValue configurationValue = (ConfigurationValue) entry.getValue();
             Object value = configurationValue.getValue();
             if (value instanceof DynamicConfiguration dynamicConfig) {
+                if (parts > 0) {
+                    lines.add("");
+                }
                 for (String comment : configurationValue.getComments()) {
                     lines.add(prefix + "# " + comment);
                 }
                 lines.add(path + ":" + (dynamicConfig.entries.isEmpty() ? " {}" : ""));
                 dynamicConfig.saveEntries(lines, indent + 2);
+                parts++;
             } else {
                 for (String comment : configurationValue.getComments()) {
                     lines.add(prefix + "# " + comment);
@@ -167,9 +189,9 @@ public class DynamicConfiguration extends Configuration {
                 } else {
                     lines.add(line + toString(value));
                 }
+                parts++;
             }
         }
-        return lines;
     }
 
     private static String toString(Object object) {
