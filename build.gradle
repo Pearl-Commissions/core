@@ -38,6 +38,8 @@ subprojects { p ->
     }
 
     dependencies {
+        implementation 'org.jetbrains:annotations:20.1.0'
+        implementation 'com.github.cryptomorin:XSeries:8.5.0.1'
         if (p.name != 'api') {
             implementation project(':api')
             if (p.name != 'all' && p.name != 'core') {
