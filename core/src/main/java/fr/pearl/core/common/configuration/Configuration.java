@@ -2,56 +2,47 @@ package fr.pearl.core.common.configuration;
 
 import fr.pearl.api.common.configuration.ConfigurationException;
 import fr.pearl.api.common.configuration.PearlConfiguration;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.representer.Representer;
+import org.simpleyaml.configuration.file.YamlFile;
+import org.simpleyaml.exceptions.InvalidConfigurationException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 public abstract class Configuration implements PearlConfiguration {
 
-    protected final Yaml yaml;
     protected final File file;
-    protected final Map<String, Object> entries;
+    protected final YamlFile yamlFile;
 
-    public Configuration(File file, Class<?> clazz) {
-        this.entries = new LinkedHashMap<>();
-        Representer representer = new Representer() {
-            {
-                this.representers.put(clazz, config -> represent(((Configuration) config).entries));
-            }
-        };
-        DumperOptions options = new DumperOptions();
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        this.yaml = new Yaml(new Constructor(), representer, options);
+    public Configuration(File file) {
         this.file = file;
-        if (!this.file.exists()) {
-            if (this.file.getParentFile() != null && !this.file.getParentFile().exists()) {
-                this.file.getParentFile().mkdirs();
-            }
-
-            try {
-                this.file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public Configuration(Configuration configuration, Map<String, Object> entries) {
-        this.entries = entries;
-        this.file = configuration.file;
-        this.yaml = configuration.yaml;
+        this.yamlFile = new YamlFile(file);
+        this.yamlFile.options().copyDefaults(true);
     }
 
     @Override
     public final Set<String> getKeys() {
-        return this.entries.keySet();
+        return this.yamlFile.getKeys(false);
+    }
+
+    @Override
+    public void load() {
+        try {
+            this.yamlFile.createOrLoadWithComments();
+        } catch (InvalidConfigurationException | IOException e) {
+            throw new ConfigurationException("Cannot load configuration file (" + this.file.getPath() + ")", e);
+        }
+    }
+
+    @Override
+    public void save() {
+        try {
+            System.out.println(this.yamlFile.saveToStringWithComments());
+            this.yamlFile.saveWithComments();
+        } catch (IOException e) {
+            throw new ConfigurationException("Cannot load configuration file (" + this.file.getPath() + ")", e);
+        }
     }
 
     @Override
@@ -59,11 +50,20 @@ public abstract class Configuration implements PearlConfiguration {
         return this.file;
     }
 
-    protected final void loadException(Exception e) {
-        throw new ConfigurationException("Cannot load configuration file (" + this.file.getPath() + ")", e);
+    @Override
+    public <T> void set(String path, T value) {
+        this.yamlFile.set(path, value);
     }
 
-    protected final void saveException(Exception e) {
-        throw new ConfigurationException("Cannot load configuration file (" + this.file.getPath() + ")", e);
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T get(String path, T defaultValue) {
+        this.yamlFile.addDefault(path, defaultValue);
+        return (T) this.yamlFile.get(path, defaultValue);
+    }
+
+    @Override
+    public PearlConfiguration getSection(String path, Map<String, Object> defaultEntries) {
+        return null;
     }
 }
