@@ -7,6 +7,7 @@ import org.simpleyaml.configuration.ConfigurationSection;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -50,13 +51,16 @@ public class DynamicConfiguration extends Configuration {
                         String[] keyComments = keys.keyComments();
                         Consumer<String> setComments = keyComments.length != 0 ? s -> this.yamlFile.setComment(s, StringUtils.join(keyComments, "\n")) : s -> {};
                         String path = (parent == null ? "" : parent + ".") + keys.value();
-                        this.yamlFile.setComment(path, StringUtils.join(keys.comments(), "\n"), keys.commentType());
+                        String[] comments = keys.comments();
+                        if (comments.length > 0) {
+                            this.yamlFile.setComment(path, StringUtils.join(comments, "\n"), keys.commentType());
+                        }
                         ConfigurationSection section = this.yamlFile.getConfigurationSection(path);
                         if (section == null) {
                             String[] defaultKeys = keys.defaultKeys();
                             for (int i = 0; i < list.size(); i++) {
                                 if (i >= defaultKeys.length) break;
-                                ConfigurationKey part = (ConfigurationKey) list.get(i);
+                                ConfigurationPart part = (ConfigurationPart) list.get(i);
                                 String keyName = defaultKeys[i];
                                 String keyPath = path + "." + keyName;
                                 setComments.accept(keyPath);
@@ -69,7 +73,7 @@ public class DynamicConfiguration extends Configuration {
                         }
                         list.clear();
                         for (String key : section.getKeys(false)) {
-                            ConfigurationKey part = list.create(key);
+                            ConfigurationPart part = list.create(key);
                             String keyPath = path + "." + key;
                             setComments.accept(keyPath);
                             this.loadFields(keyPath, part);
@@ -85,19 +89,39 @@ public class DynamicConfiguration extends Configuration {
                 if (configurationPath == null) continue;
                 String path = (parent == null ? "" : parent + ".") + configurationPath.value();
                 Object value = Reflection.get(field, instance);
-                this.yamlFile.setComment(path, StringUtils.join(configurationPath.comments(), "\n"), configurationPath.commentType());
+                String[] comments = configurationPath.comments();
+                if (comments.length > 0) {
+                    this.yamlFile.setComment(path, StringUtils.join(comments, "\n"), configurationPath.commentType());
+                }
                 if (value instanceof ConfigurationPart part) {
                     this.loadFields(path, part);
                     part.loaded();
                     continue;
                 }
                 Object configValue = this.yamlFile.get(path, value);
-                if (configValue != null && configValue.getClass() == value.getClass()) {
-                    value = configValue;
+                Class<?> exceptedClass = value.getClass();
+                if (exceptedClass == Float.class) exceptedClass = Double.class;
+                if (configValue != null && exceptedClass.isAssignableFrom(configValue.getClass())) {
+                    if (value.getClass() == Float.class) {
+                        double doubleValue = (double) configValue;
+                        value = (float) doubleValue;
+                    } else {
+                        value = configValue;
+                    }
                 }
 
                 if (value instanceof String string) {
                     value = string.replaceAll("&", "§");
+                } else if (value instanceof List list) {
+                    Object object = list.size() == 0 ? null : list.get(0);
+                    if (object instanceof String) {
+                        List<String> coloredList = new ArrayList<>(list.size());
+                        for (Object o : list) {
+                            String string = (String) o;
+                            coloredList.add(string.replaceAll("&", "§"));
+                        }
+                        value = coloredList;
+                    }
                 }
 
                 Reflection.set(field, instance, value);
@@ -116,7 +140,7 @@ public class DynamicConfiguration extends Configuration {
                     Object value = Reflection.get(field, instance);
                     if (value instanceof ConfigurationList list) {
                         for (Object object : list) {
-                            ConfigurationKey key = (ConfigurationKey) object;
+                            ConfigurationPart key = (ConfigurationPart) object;
                             this.saveFields(path + "." + key.getName(), key);
                         }
                     }
@@ -132,6 +156,16 @@ public class DynamicConfiguration extends Configuration {
                 }
                 if (value instanceof String string) {
                     value = string.replaceAll("§", "&");
+                } else if (value instanceof List list) {
+                    Object object = list.size() == 0 ? null : list.get(0);
+                    if (object instanceof String) {
+                        List<String> coloredList = new ArrayList<>(list.size());
+                        for (Object o : list) {
+                            String string = (String) o;
+                            coloredList.add(string.replaceAll("§", "&"));
+                        }
+                        value = coloredList;
+                    }
                 }
                 this.yamlFile.set(path, value);
             }
@@ -144,7 +178,7 @@ public class DynamicConfiguration extends Configuration {
         while (clazz != null) {
             classes.addFirst(clazz);
             clazz = clazz.getSuperclass();
-            if (clazz.isAssignableFrom(ConfigurationPart.class)) clazz = null;
+            if (clazz.isAssignableFrom(ConfigurationPart.class) || clazz == Object.class) clazz = null;
         }
 
         return classes;
