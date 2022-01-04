@@ -51,6 +51,7 @@ public class Menu implements InventoryHolder, PearlMenu {
     public void open(Player player) {
         player.openInventory(this.getInventory());
         player.updateInventory();
+        this.menu.onOpen(this, player);
     }
 
     @Override
