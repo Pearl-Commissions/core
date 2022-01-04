@@ -38,7 +38,6 @@ public abstract class Configuration implements PearlConfiguration {
     @Override
     public void save() {
         try {
-            System.out.println(this.yamlFile.saveToStringWithComments());
             this.yamlFile.saveWithComments();
         } catch (IOException e) {
             throw new ConfigurationException("Cannot load configuration file (" + this.file.getPath() + ")", e);
