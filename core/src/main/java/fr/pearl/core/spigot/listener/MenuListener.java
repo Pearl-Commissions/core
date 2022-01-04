@@ -18,7 +18,7 @@ public class MenuListener implements Listener {
             event.setCancelled(true);
             MenuItem item = menu.getItemMap().get(event.getSlot());
             if (item == null) return;
-            item.click(event, player, event.getClick());
+            item.click(menu, event, player, event.getClick());
         }
     }
 }
