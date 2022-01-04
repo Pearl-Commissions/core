@@ -2,7 +2,7 @@ package fr.pearl.core.common.configuration;
 
 import fr.pearl.api.common.configuration.dynamic.*;
 import fr.pearl.api.common.util.Reflection;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.simpleyaml.configuration.ConfigurationSection;
 
 import java.io.File;
@@ -39,7 +39,7 @@ public class DynamicConfiguration extends Configuration {
         super.save();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void loadFields(String parent, Object instance) {
         for (Class<?> superClass : this.getSuperClasses(instance)) {
             for (Field field : superClass.getDeclaredFields()) {
@@ -47,7 +47,8 @@ public class DynamicConfiguration extends Configuration {
                 ConfigurationKeys keys = field.getAnnotation(ConfigurationKeys.class);
                 if (keys != null) {
                     Object value = Reflection.get(field, instance);
-                    if (value instanceof ConfigurationList list) {
+                    if (value instanceof ConfigurationList) {
+                        ConfigurationList list = (ConfigurationList) value;
                         String[] keyComments = keys.keyComments();
                         Consumer<String> setComments = keyComments.length != 0 ? s -> this.yamlFile.setComment(s, StringUtils.join(keyComments, "\n")) : s -> {};
                         String path = (parent == null ? "" : parent + ".") + keys.value();
@@ -93,7 +94,8 @@ public class DynamicConfiguration extends Configuration {
                 if (comments.length > 0) {
                     this.yamlFile.setComment(path, StringUtils.join(comments, "\n"), configurationPath.commentType());
                 }
-                if (value instanceof ConfigurationPart part) {
+                if (value instanceof ConfigurationPart) {
+                    ConfigurationPart part = (ConfigurationPart) value;
                     this.loadFields(path, part);
                     part.loaded();
                     continue;
@@ -110,9 +112,11 @@ public class DynamicConfiguration extends Configuration {
                     }
                 }
 
-                if (value instanceof String string) {
+                if (value instanceof String) {
+                    String string = (String) value;
                     value = string.replaceAll("&", "§");
-                } else if (value instanceof List list) {
+                } else if (value instanceof List) {
+                    List list = (List) value;
                     Object object = list.size() == 0 ? null : list.get(0);
                     if (object instanceof String) {
                         List<String> coloredList = new ArrayList<>(list.size());
@@ -130,6 +134,7 @@ public class DynamicConfiguration extends Configuration {
 
     }
 
+    @SuppressWarnings("rawtypes")
     private void saveFields(String parent, Object instance) {
         for (Class<?> superClass : this.getSuperClasses(instance)) {
             for (Field field : superClass.getDeclaredFields()) {
@@ -138,7 +143,8 @@ public class DynamicConfiguration extends Configuration {
                 if (keys != null) {
                     String path = (parent == null ? "" : parent + ".") + keys.value();
                     Object value = Reflection.get(field, instance);
-                    if (value instanceof ConfigurationList list) {
+                    if (value instanceof ConfigurationList) {
+                        ConfigurationList list = (ConfigurationList) value;
                         for (Object object : list) {
                             ConfigurationPart key = (ConfigurationPart) object;
                             this.saveFields(path + "." + key.getName(), key);
@@ -150,13 +156,16 @@ public class DynamicConfiguration extends Configuration {
                 if (configurationPath == null) continue;
                 String path = (parent == null ? "" : parent + ".") + configurationPath.value();
                 Object value = Reflection.get(field, instance);
-                if (value instanceof ConfigurationPart part) {
+                if (value instanceof ConfigurationPart) {
+                    ConfigurationPart part = (ConfigurationPart) value;
                     this.saveFields(path, part);
                     continue;
                 }
-                if (value instanceof String string) {
+                if (value instanceof String) {
+                    String string = (String) value;
                     value = string.replaceAll("§", "&");
-                } else if (value instanceof List list) {
+                } else if (value instanceof List) {
+                    List list = (List) value;
                     Object object = list.size() == 0 ? null : list.get(0);
                     if (object instanceof String) {
                         List<String> coloredList = new ArrayList<>(list.size());

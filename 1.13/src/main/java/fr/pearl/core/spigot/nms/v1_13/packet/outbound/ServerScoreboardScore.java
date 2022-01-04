@@ -5,7 +5,7 @@ import fr.pearl.api.spigot.packet.PacketServer;
 import fr.pearl.api.spigot.packet.registry.enums.ScoreAction;
 import fr.pearl.api.spigot.packet.registry.outbound.NmsPacketServerScoreboardScore;
 import net.minecraft.server.v1_13_R2.*;
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang.Validate;
 
 import java.util.EnumMap;
 import java.util.function.Supplier;

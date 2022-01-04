@@ -3,7 +3,7 @@ package fr.pearl.core.common.configuration;
 import fr.pearl.api.common.configuration.ConfigurationType;
 import fr.pearl.api.common.configuration.PearlConfiguration;
 import fr.pearl.api.common.configuration.PearlConfigurationManager;
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang.Validate;
 
 import java.io.File;
 

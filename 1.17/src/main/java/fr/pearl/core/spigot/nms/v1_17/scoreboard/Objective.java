@@ -12,8 +12,8 @@ public class Objective extends ScoreboardObjective implements NmsObjective<Score
     private IChatBaseComponent displayName;
 
     public Objective(String name, ScoreboardServer server, IScoreboardCriteria criteria) {
-        super(server, name, criteria, null, criteria.f());
-        this.displayName = CraftChatMessage.fromString(name)[0];
+        super(server, name, criteria, CraftChatMessage.fromString(name)[0], criteria.f());
+        this.displayName = this.getDisplayName();
     }
 
     @Override
@@ -23,6 +23,7 @@ public class Objective extends ScoreboardObjective implements NmsObjective<Score
 
     @Override
     public IChatBaseComponent getDisplayName() {
+        if (this.displayName == null) return super.getDisplayName();
         return this.displayName;
     }
 
