@@ -67,9 +67,6 @@ subprojects { p ->
         exclude 'com/cryptomorin/xseries/XEntity*'
         exclude 'com/cryptomorin/xseries/XBlock*'
         exclude 'org/yaml/snakeyaml/**'
-
-        relocate 'com.cryptomorin.xseries', 'fr.pearl.api.libs.xseries'
-        relocate 'org.simpleyaml', 'fr.pearl.api.libs.simpleyaml'
     }
 
     artifacts {
