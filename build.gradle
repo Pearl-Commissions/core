@@ -41,6 +41,7 @@ subprojects { p ->
     dependencies {
         implementation 'org.jetbrains:annotations:20.1.0'
         implementation 'com.github.cryptomorin:XSeries:8.5.0.1'
+        implementation 'me.carleslc.Simple-YAML:Simple-Yaml:1.7'
         if (p.name != 'api') {
             implementation project(':api')
             if (p.name != 'all' && p.name != 'core') {
@@ -65,6 +66,7 @@ subprojects { p ->
         exclude 'com/cryptomorin/xseries/SkullUtils*'
         exclude 'com/cryptomorin/xseries/XEntity*'
         exclude 'com/cryptomorin/xseries/XBlock*'
+        exclude 'org/yaml/snakeyaml/**'
 
         relocate 'com.cryptomorin.xseries', 'fr.pearl.api.libs.xseries'
         relocate 'org.simpleyaml', 'fr.pearl.api.libs.simpleyaml'
