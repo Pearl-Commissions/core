@@ -10,7 +10,7 @@ import java.util.List;
 public class CommandExecutor {
 
     public static void execute(PearlCommand command, PearlSender sender, String label, String[] args) {
-        if (command.getPermission() != null && sender.hasPermission(command.getPermission())) {
+        if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
             if (command.getPermissionMessage() != null) sender.sendMessage(command.getPermissionMessage());
             return;
         }
@@ -57,9 +57,10 @@ public class CommandExecutor {
                 }
             }
             List<String> tabComplete = command.tabComplete(sender, label, args);
-            if (tabComplete != null) {
-                names.addAll(tabComplete);
+            if (tabComplete == null) {
+                return null;
             }
+            names.addAll(tabComplete);
 
             return names;
         }
