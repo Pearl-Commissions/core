@@ -2,60 +2,54 @@ package fr.pearl.core.common.configuration;
 
 import fr.pearl.api.common.configuration.ConfigurationException;
 import fr.pearl.api.common.configuration.PearlConfiguration;
-import org.simpleyaml.configuration.file.YamlFile;
-import org.simpleyaml.exceptions.InvalidConfigurationException;
+import fr.pearl.api.common.configuration.PearlSection;
+import fr.pearl.api.common.util.io.IOUtils;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Map;
-import java.util.Set;
 
-public abstract class Configuration implements PearlConfiguration {
+public abstract class Configuration extends ConfigurationSection implements PearlConfiguration {
 
     protected final File file;
-    protected final YamlFile yamlFile;
+    protected final Yaml yaml;
 
     public Configuration(File file) {
         this.file = file;
-        this.yamlFile = new YamlFile(file);
-        this.yamlFile.options().copyDefaults(true);
+        Representer representer = new Representer() {{
+            this.representers.put(ConfigurationSection.class, data -> represent(((PearlSection) data).getEntries()));
+        }};
+        representer.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        DumperOptions options = new DumperOptions();
+        options.setIndent(2);
+        options.setAllowUnicode(true);
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        this.yaml = new Yaml(new Constructor(), representer, options);
+        IOUtils.getOrCreate(this.file);
     }
 
     @Override
-    public void setResource(InputStream resource) {
-        if (!this.file.exists()) {
-            if (this.file.getParentFile() != null && !this.file.getParentFile().exists()) {
-                this.file.getParentFile().mkdirs();
-            }
-
-            try {
-                Files.copy(resource, Paths.get(this.file.getPath()), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public final Set<String> getKeys() {
-        return this.yamlFile.getKeys(false);
-    }
-
-    @Override
+    @SuppressWarnings("unchecked")
     public void load() {
-        try {
-            this.yamlFile.createOrLoadWithComments();
-        } catch (InvalidConfigurationException | IOException e) {
-            throw new ConfigurationException("Cannot load configuration file (" + this.file.getPath() + ")", e);
-        }
-    }
+        try (BufferedInputStream input = new BufferedInputStream(new FileInputStream(this.file))) {
+            Map<String, Object> map = this.yaml.load(input);
+            if (map == null) return;
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String path = entry.getKey();
+                Object value = entry.getValue();
 
-    @Override
-    public void save() {
-        try {
-            this.yamlFile.saveWithComments();
+                if (value instanceof Map) {
+                    ConfigurationSection section = new ConfigurationSection();
+                    section.loadFromMap((Map<String, Object>) value);
+                    this.entries.put(path, section);
+                    continue;
+                }
+
+                this.entries.put(path, value);
+            }
         } catch (IOException e) {
             throw new ConfigurationException("Cannot load configuration file (" + this.file.getPath() + ")", e);
         }
@@ -66,20 +60,4 @@ public abstract class Configuration implements PearlConfiguration {
         return this.file;
     }
 
-    @Override
-    public <T> void set(String path, T value) {
-        this.yamlFile.set(path, value);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T get(String path, T defaultValue) {
-        this.yamlFile.addDefault(path, defaultValue);
-        return (T) this.yamlFile.get(path, defaultValue);
-    }
-
-    @Override
-    public PearlConfiguration getSection(String path, Map<String, Object> defaultEntries) {
-        return null;
-    }
 }

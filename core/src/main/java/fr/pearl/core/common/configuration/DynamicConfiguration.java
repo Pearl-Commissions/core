@@ -1,195 +1,197 @@
 package fr.pearl.core.common.configuration;
 
+import fr.pearl.api.common.configuration.ConfigurationException;
+import fr.pearl.api.common.configuration.PearlSection;
 import fr.pearl.api.common.configuration.dynamic.*;
 import fr.pearl.api.common.util.Reflection;
-import org.apache.commons.lang.StringUtils;
-import org.simpleyaml.configuration.ConfigurationSection;
+import fr.pearl.core.common.configuration.comment.CommentNode;
+import fr.pearl.core.common.configuration.comment.CommentTree;
 
-import java.io.File;
+import java.io.*;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Consumer;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DynamicConfiguration extends Configuration {
 
     private final Object instance;
+    private final Map<String, String[]> comments = new HashMap<>();
+    private final String[] headers;
+
+    private static final Pattern LIST_ENTRY_PATTERN = Pattern.compile("^(\\s*)- .$");
+    private static final Pattern SECTION_PATTERN = Pattern.compile("^(\\s*)[a-zA-Z0-9_-]+:$");
+    private static final Pattern VALUE_PATTERN = Pattern.compile("^(\\s*)[a-zA-Z0-9_-]+: .+$");
+
+    private static MatchResult matchResult(String line) {
+        Matcher matcher;
+        if (LIST_ENTRY_PATTERN.matcher(line).matches()) {
+            return null;
+        } else if ((matcher = SECTION_PATTERN.matcher(line)).matches()) {
+            return matcher.toMatchResult();
+        } else if ((matcher = VALUE_PATTERN.matcher(line)).matches()) {
+            return matcher.toMatchResult();
+        }
+
+        throw new IllegalArgumentException("Cannot match line " + line);
+    }
 
     public DynamicConfiguration(Object instance, File file) {
         super(file);
 
         this.instance = instance;
         ConfigurationHeader header = instance.getClass().getDeclaredAnnotation(ConfigurationHeader.class);
-        if (header != null) {
-             this.yamlFile.options().copyHeader(true).header(StringUtils.join(header.value(), "\n"));
-             this.yamlFile.options().copyDefaults(false);
-        }
+        this.headers = header == null ? null : header.value();
     }
 
     @Override
     public void load() {
         super.load();
-        this.loadFields(null, this.instance);
+        this.loadFromInstance(null, this.instance, this);
     }
 
     @Override
     public void save() {
-        this.saveFields(null, this.instance);
-        super.save();
+        if (this.entries.isEmpty()) return;
+
+        String dump = this.yaml.dump(this.entries);
+        StringBuilder values = new StringBuilder();
+        if (this.headers != null) {
+            for (String header : this.headers) {
+                if (header.equals("")) {
+                    values.append("\n");
+                } else {
+                    values.append("# ").append(header).append("\n");
+                }
+            }
+        }
+        try (BufferedReader reader = new BufferedReader(new StringReader(dump))) {
+            String line;
+            CommentNode node = null;
+            while ((line = reader.readLine()) != null) {
+                MatchResult result = matchResult(line);
+                String path = line.trim().split(":")[0];
+                if (result != null) {
+                    int indent = result.group(1).length();
+                    node = CommentTree.getNode(node, path, indent);
+                    String[] comments = this.comments.get(node.getFullPath());
+                    if (comments != null) {
+                        String separator = node.getIndentSeparator();
+                        for (String comment : comments) {
+                            values.append(separator);
+                            if (!comment.equals("")) {
+                                values.append("# ").append(comment);
+                            }
+                            values.append("\n");
+                        }
+                    }
+                }
+                values.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            throw new ConfigurationException("Cannot save configuration file (" + this.file.getPath() + ")", e);
+        }
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(this.file), StandardCharsets.UTF_8)) {
+            writer.write(values.toString());
+        } catch (IOException e) {
+            throw new ConfigurationException("Cannot save configuration file (" + this.file.getPath() + ")", e);
+        }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void loadFields(String parent, Object instance) {
-        for (Class<?> superClass : this.getSuperClasses(instance)) {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void loadFromInstance(String parentPath, Object instance, PearlSection parent) {
+        for (Class<?> superClass : getSuperClasses(instance)) {
             for (Field field : superClass.getDeclaredFields()) {
+                ConfigurationPath annotatedPath = field.getAnnotation(ConfigurationPath.class);
+                ConfigurationKeys annotatedKeys = field.getAnnotation(ConfigurationKeys.class);
+                if (annotatedPath == null) return;
                 Reflection.setAccessible(field);
-                ConfigurationKeys keys = field.getAnnotation(ConfigurationKeys.class);
-                if (keys != null) {
-                    Object value = Reflection.get(field, instance);
-                    if (value instanceof ConfigurationList) {
-                        ConfigurationList list = (ConfigurationList) value;
-                        String[] keyComments = keys.keyComments();
-                        Consumer<String> setComments = keyComments.length != 0 ? s -> this.yamlFile.setComment(s, StringUtils.join(keyComments, "\n")) : s -> {};
-                        String path = (parent == null ? "" : parent + ".") + keys.value();
-                        String[] comments = keys.comments();
-                        if (comments.length > 0) {
-                            this.yamlFile.setComment(path, StringUtils.join(comments, "\n"), keys.commentType());
-                        }
-                        ConfigurationSection section = this.yamlFile.getConfigurationSection(path);
-                        if (section == null) {
-                            String[] defaultKeys = keys.defaultKeys();
+                String path = annotatedPath.value();
+                String fullPath;
+                String commentPath;
+                String annotatedCommentPath = annotatedPath.commentPath();
+                if (parentPath == null) {
+                    fullPath = path;
+                    commentPath = annotatedCommentPath.equals("") ? path : annotatedCommentPath;
+                } else {
+                    fullPath = parentPath + "." + path;
+                    commentPath = annotatedCommentPath.equals("") ? fullPath : parentPath + "." + path;
+                }
+                Object fieldValue = Reflection.get(field, instance);
+                String[] comments = annotatedPath.comments();
+                if (comments != null) {
+                    this.comments.put(commentPath, comments);
+                }
+                if (fieldValue instanceof ConfigurationPart) {
+                    PearlSection section = parent.getSection(path);
+                    ConfigurationPart part = (ConfigurationPart) fieldValue;
+                    this.loadFromInstance(fullPath, part, section);
+                    continue;
+                } else if (fieldValue instanceof ConfigurationList) {
+                    ConfigurationList list = (ConfigurationList) fieldValue;
+                    PearlSection section = parent.getSection(path);
+                    Map<String, Object> entries = section.getEntries();
+                    String[] defaultComments = annotatedKeys == null ? null : annotatedKeys.keyComments();
+                    if (entries.isEmpty()) {
+                        String[] defaultKeys = annotatedKeys == null ? null : annotatedKeys.defaultKeys();
+                        if (defaultKeys != null) {
                             for (int i = 0; i < list.size(); i++) {
+                                ConfigurationSection keySection = new ConfigurationSection();
                                 if (i >= defaultKeys.length) break;
                                 ConfigurationPart part = (ConfigurationPart) list.get(i);
                                 String keyName = defaultKeys[i];
-                                String keyPath = path + "." + keyName;
-                                setComments.accept(keyPath);
-                                this.loadFields(keyPath, part);
+                                String keyPath = fullPath + "." + keyName;
+                                this.loadFromInstance(keyPath, part, keySection);
                                 part.setName(keyName);
                                 part.loaded();
+                                if (defaultComments != null) {
+                                    this.comments.put(keyPath, defaultComments);
+                                }
+                                section.set(keyName, keySection);
                             }
-
-                            continue;
                         }
-                        list.clear();
-                        for (String key : section.getKeys(false)) {
+                    } else {
+                        for (Map.Entry<String, Object> entry : entries.entrySet()) {
+                            String key = entry.getKey();
+                            Object value = entry.getValue();
+                            PearlSection keySection;
+                            if (!(value instanceof PearlSection)) {
+                                keySection = new ConfigurationSection();
+                                entry.setValue(keySection);
+                            } else {
+                                keySection = (PearlSection) value;
+                            }
+                            String keyPath = fullPath + "." + key;
+                            if (defaultComments != null) {
+                                this.comments.put(keyPath, defaultComments);
+                            }
                             ConfigurationPart part = list.create(key);
-                            String keyPath = path + "." + key;
-                            setComments.accept(keyPath);
-                            this.loadFields(keyPath, part);
+                            this.loadFromInstance(keyPath, part, keySection);
                             part.setName(key);
                             part.loaded();
                             list.add(part);
                         }
-
                     }
                     continue;
                 }
-                ConfigurationPath configurationPath = field.getAnnotation(ConfigurationPath.class);
-                if (configurationPath == null) continue;
-                String path = (parent == null ? "" : parent + ".") + configurationPath.value();
-                Object value = Reflection.get(field, instance);
-                String[] comments = configurationPath.comments();
-                if (comments.length > 0) {
-                    this.yamlFile.setComment(path, StringUtils.join(comments, "\n"), configurationPath.commentType());
-                }
-                if (value instanceof ConfigurationPart) {
-                    ConfigurationPart part = (ConfigurationPart) value;
-                    this.loadFields(path, part);
-                    part.loaded();
-                    continue;
-                }
-                Object configValue = this.yamlFile.get(path, value);
-                Class<?> exceptedClass = value.getClass();
-                if (exceptedClass == Float.class) exceptedClass = Double.class;
-                if (configValue != null && exceptedClass.isAssignableFrom(configValue.getClass())) {
-                    if (value.getClass() == Float.class) {
-                        double doubleValue = (double) configValue;
-                        value = (float) doubleValue;
-                    } else {
-                        value = configValue;
-                    }
-                }
 
-                if (value instanceof String) {
-                    String string = (String) value;
-                    value = string.replaceAll("&", "§");
-                } else if (value instanceof List) {
-                    List list = (List) value;
-                    Object object = list.size() == 0 ? null : list.get(0);
-                    if (object instanceof String) {
-                        List<String> coloredList = new ArrayList<>(list.size());
-                        for (Object o : list) {
-                            String string = (String) o;
-                            coloredList.add(string.replaceAll("&", "§"));
-                        }
-                        value = coloredList;
-                    }
-                }
-
-                Reflection.set(field, instance, value);
-            }
-        }
-
-    }
-
-    @SuppressWarnings("rawtypes")
-    private void saveFields(String parent, Object instance) {
-        for (Class<?> superClass : this.getSuperClasses(instance)) {
-            for (Field field : superClass.getDeclaredFields()) {
-                Reflection.setAccessible(field);
-                ConfigurationKeys keys = field.getAnnotation(ConfigurationKeys.class);
-                if (keys != null) {
-                    String path = (parent == null ? "" : parent + ".") + keys.value();
-                    Object value = Reflection.get(field, instance);
-                    if (value instanceof ConfigurationList) {
-                        ConfigurationList list = (ConfigurationList) value;
-                        for (Object object : list) {
-                            ConfigurationPart key = (ConfigurationPart) object;
-                            this.saveFields(path + "." + key.getName(), key);
-                        }
-                    }
-                    continue;
-                }
-                ConfigurationPath configurationPath = field.getAnnotation(ConfigurationPath.class);
-                if (configurationPath == null) continue;
-                String path = (parent == null ? "" : parent + ".") + configurationPath.value();
-                Object value = Reflection.get(field, instance);
-                if (value instanceof ConfigurationPart) {
-                    ConfigurationPart part = (ConfigurationPart) value;
-                    this.saveFields(path, part);
-                    continue;
-                }
-                if (value instanceof String) {
-                    String string = (String) value;
-                    value = string.replaceAll("§", "&");
-                } else if (value instanceof List) {
-                    List list = (List) value;
-                    Object object = list.size() == 0 ? null : list.get(0);
-                    if (object instanceof String) {
-                        List<String> coloredList = new ArrayList<>(list.size());
-                        for (Object o : list) {
-                            String string = (String) o;
-                            coloredList.add(string.replaceAll("§", "&"));
-                        }
-                        value = coloredList;
-                    }
-                }
-                this.yamlFile.set(path, value);
+                Object configValue = parent.get(path, fieldValue);
+                Reflection.set(field, instance, configValue);
             }
         }
     }
 
     private List<Class<?>> getSuperClasses(Object instance) {
         LinkedList<Class<?>> classes = new LinkedList<>();
-        Class<?> clazz = instance.getClass();
-        while (clazz != null) {
-            classes.addFirst(clazz);
-            clazz = clazz.getSuperclass();
-            if (clazz.isAssignableFrom(ConfigurationPart.class) || clazz == Object.class) clazz = null;
+        Class<?> superClass = instance.getClass();
+        while (superClass != null &&  superClass != Object.class && !superClass.isAssignableFrom(ConfigurationPart.class)) {
+            classes.addFirst(superClass);
+            superClass = superClass.getSuperclass();
         }
 
         return classes;
     }
+
 }
