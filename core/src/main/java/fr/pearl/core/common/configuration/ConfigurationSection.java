@@ -99,8 +99,9 @@ public class ConfigurationSection implements PearlSection {
 
         if (value == null || value.getClass() != excepted) {
             value = defaultValue;
-        } else {
-            value = isFloat ? (float) value : value;
+        } else if (isFloat) {
+            double doubleValue = (double) value;
+            value = (float) doubleValue;
         }
 
         return value;

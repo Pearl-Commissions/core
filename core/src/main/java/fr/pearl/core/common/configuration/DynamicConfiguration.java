@@ -9,6 +9,7 @@ import fr.pearl.core.common.configuration.comment.CommentTree;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.MatchResult;
@@ -21,7 +22,7 @@ public class DynamicConfiguration extends Configuration {
     private final Map<String, String[]> comments = new HashMap<>();
     private final String[] headers;
 
-    private static final Pattern LIST_ENTRY_PATTERN = Pattern.compile("^(\\s*)- .$");
+    private static final Pattern LIST_ENTRY_PATTERN = Pattern.compile("^(\\s*)-.+$");
     private static final Pattern SECTION_PATTERN = Pattern.compile("^(\\s*)[a-zA-Z0-9_-]+:$");
     private static final Pattern VALUE_PATTERN = Pattern.compile("^(\\s*)[a-zA-Z0-9_-]+: .+$");
 
@@ -35,7 +36,7 @@ public class DynamicConfiguration extends Configuration {
             return matcher.toMatchResult();
         }
 
-        throw new IllegalArgumentException("Cannot match line " + line);
+        return null;
     }
 
     public DynamicConfiguration(Object instance, File file) {
@@ -106,7 +107,7 @@ public class DynamicConfiguration extends Configuration {
             for (Field field : superClass.getDeclaredFields()) {
                 ConfigurationPath annotatedPath = field.getAnnotation(ConfigurationPath.class);
                 ConfigurationKeys annotatedKeys = field.getAnnotation(ConfigurationKeys.class);
-                if (annotatedPath == null) return;
+                if (annotatedPath == null) continue;
                 Reflection.setAccessible(field);
                 String path = annotatedPath.value();
                 String fullPath;
@@ -128,6 +129,7 @@ public class DynamicConfiguration extends Configuration {
                     PearlSection section = parent.getSection(path);
                     ConfigurationPart part = (ConfigurationPart) fieldValue;
                     this.loadFromInstance(fullPath, part, section);
+                    part.loaded();
                     continue;
                 } else if (fieldValue instanceof ConfigurationList) {
                     ConfigurationList list = (ConfigurationList) fieldValue;
@@ -153,6 +155,7 @@ public class DynamicConfiguration extends Configuration {
                             }
                         }
                     } else {
+                        list.clear();
                         for (Map.Entry<String, Object> entry : entries.entrySet()) {
                             String key = entry.getKey();
                             Object value = entry.getValue();
@@ -178,6 +181,20 @@ public class DynamicConfiguration extends Configuration {
                 }
 
                 Object configValue = parent.get(path, fieldValue);
+                if (configValue instanceof String) {
+                    configValue = ((String) configValue).replaceAll("&", "§");
+                } else if (configValue instanceof List) {
+                    ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+                    boolean isString = String.class.getName().equals(genericType.getActualTypeArguments()[0].getTypeName());
+                    if (isString) {
+                        List<String> currentList = (List<String>) configValue;
+                        List<String> coloredList = new ArrayList<>(currentList.size());
+                        for (String string : currentList) {
+                            coloredList.add(string.replaceAll("&", "§"));
+                        }
+                        configValue = coloredList;
+                    }
+                }
                 Reflection.set(field, instance, configValue);
             }
         }
@@ -186,7 +203,7 @@ public class DynamicConfiguration extends Configuration {
     private List<Class<?>> getSuperClasses(Object instance) {
         LinkedList<Class<?>> classes = new LinkedList<>();
         Class<?> superClass = instance.getClass();
-        while (superClass != null &&  superClass != Object.class && !superClass.isAssignableFrom(ConfigurationPart.class)) {
+        while (superClass != null) {
             classes.addFirst(superClass);
             superClass = superClass.getSuperclass();
         }
