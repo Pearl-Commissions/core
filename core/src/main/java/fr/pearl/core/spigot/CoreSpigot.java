@@ -38,8 +38,6 @@ public class CoreSpigot extends PearlSpigot {
         for (Listener listener : Arrays.asList(new MenuListener(), new ConnectionListener())) {
             this.getServer().getPluginManager().registerEvents(listener, this);
         }
-
-        new TestConf();
     }
 
     @Override
