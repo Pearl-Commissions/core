@@ -61,10 +61,9 @@ public class CommandExecutor {
             }
             List<String> tabComplete = command.tabComplete(sender, label, args);
             if (tabComplete == null) {
-                return null;
+                return names.isEmpty() ? null : names;
             }
             names.addAll(tabComplete);
-
             return names;
         }
 
