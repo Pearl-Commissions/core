@@ -51,7 +51,7 @@ public class BungeeSender implements PearlSender {
     }
 
     @Override
-    public org.bukkit.command.ConsoleCommandSender getBukkitSender() {
+    public org.bukkit.command.CommandSender getBukkitSender() {
         return null;
     }
 

@@ -24,6 +24,9 @@ public class CommandExecutor {
         String arg0 = args[0].toLowerCase();
         PearlCommand argument = command.getArgumentMap().get(arg0);
         if (argument == null) {
+            argument = command.getAliasMap().get(arg0);
+        }
+        if (argument == null) {
             if (!testPlayer(command, sender)) return;
             command.execute(sender, label, args);
             return;

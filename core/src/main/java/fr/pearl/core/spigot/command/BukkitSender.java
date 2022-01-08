@@ -2,7 +2,6 @@ package fr.pearl.core.spigot.command;
 
 import fr.pearl.api.common.command.PearlSender;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -55,7 +54,7 @@ public class BukkitSender implements PearlSender {
     }
 
     @Override
-    public net.md_5.bungee.command.ConsoleCommandSender getProxySender() {
+    public net.md_5.bungee.api.CommandSender getProxySender() {
         return null;
     }
 }
