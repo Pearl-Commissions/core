@@ -5,7 +5,9 @@ import fr.pearl.api.spigot.nms.NmsVersion;
 import fr.pearl.api.spigot.nms.PearlNms;
 import fr.pearl.api.spigot.nms.PearlNmsManager;
 import org.bukkit.Bukkit;
+import org.bukkit.enchantments.Enchantment;
 
+import java.lang.reflect.Field;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,6 +37,11 @@ public class NmsManager implements PearlNmsManager {
         PearlNms<?> nms = Reflection.newInstance(Reflection.forName("fr.pearl.core.spigot.nms." + version.name().toLowerCase() + ".Nms").asSubclass(PearlNms.class));
         this.nmsVersion = version;
         this.nms = nms;
+        this.enableNewEnchants();
+    }
+
+    private void enableNewEnchants() {
+        Reflection.set(Reflection.access(Enchantment.class, "acceptingNew"), null, true);
     }
 
     @Override

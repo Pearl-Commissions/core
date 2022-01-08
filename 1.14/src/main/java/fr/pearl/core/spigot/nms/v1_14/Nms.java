@@ -2,12 +2,14 @@ package fr.pearl.core.spigot.nms.v1_14;
 
 import fr.pearl.api.spigot.nms.PearlNms;
 import fr.pearl.api.spigot.nms.scoreboard.NmsScoreboard;
+import fr.pearl.core.spigot.nms.v1_14.enchant.GlowEnchant;
 import fr.pearl.core.spigot.nms.v1_14.scoreboard.Scoreboard;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.minecraft.server.v1_14_R1.*;
 import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_14_R1.util.CraftChatMessage;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 
 public class Nms implements PearlNms<EntityPlayer> {
@@ -42,5 +44,10 @@ public class Nms implements PearlNms<EntityPlayer> {
     @Override
     public EntityPlayer getEntityPlayer(Player player) {
         return ((CraftPlayer) player).getHandle();
+    }
+
+    @Override
+    public Enchantment getGlowEnchant() {
+        return new GlowEnchant();
     }
 }

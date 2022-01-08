@@ -2,15 +2,22 @@ package fr.pearl.core.spigot.nms.v1_8;
 
 import fr.pearl.api.spigot.nms.PearlNms;
 import fr.pearl.api.spigot.nms.scoreboard.NmsScoreboard;
+import fr.pearl.core.spigot.nms.v1_8.enchant.GlowEnchant;
 import fr.pearl.core.spigot.nms.v1_8.scoreboard.Scoreboard;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftChatMessage;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class Nms implements PearlNms<EntityPlayer> {
+
+    public Nms() {
+
+    }
 
     @Override
     public void registerChannel(Player player, String baseName, String name, ChannelHandler handler) {
@@ -22,6 +29,7 @@ public class Nms implements PearlNms<EntityPlayer> {
         Channel channel = this.getEntityPlayer(player).playerConnection.networkManager.channel;
         ChannelHandler handler = channel.pipeline().get("pearl-handler");
         if (handler != null) channel.pipeline().remove(handler);
+        ItemStack itemStack = null;
     }
 
     @Override
@@ -42,5 +50,10 @@ public class Nms implements PearlNms<EntityPlayer> {
     @Override
     public EntityPlayer getEntityPlayer(Player player) {
         return ((CraftPlayer) player).getHandle();
+    }
+
+    @Override
+    public Enchantment getGlowEnchant() {
+        return new GlowEnchant();
     }
 }

@@ -13,6 +13,7 @@ import fr.pearl.core.spigot.nms.NmsManager;
 import fr.pearl.core.spigot.packet.PacketManager;
 import fr.pearl.core.spigot.sidebar.SidebarManager;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
 
