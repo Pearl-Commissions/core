@@ -4,7 +4,6 @@ import fr.pearl.api.bungee.util.BungeeUtils;
 import fr.pearl.api.common.command.PearlSender;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.command.ConsoleCommandSender;
 
 import java.util.UUID;
 
@@ -52,16 +51,12 @@ public class BungeeSender implements PearlSender {
     }
 
     @Override
-    public org.bukkit.command.ConsoleCommandSender getBukkitConsole() {
+    public org.bukkit.command.ConsoleCommandSender getBukkitSender() {
         return null;
     }
 
     @Override
-    public ConsoleCommandSender getProxyConsole() {
-        if (this.sender instanceof ConsoleCommandSender) {
-            return (ConsoleCommandSender) this.sender;
-        }
-
-        return null;
+    public CommandSender getProxySender() {
+        return this.sender;
     }
 }

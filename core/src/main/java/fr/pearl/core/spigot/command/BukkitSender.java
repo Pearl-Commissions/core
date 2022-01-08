@@ -50,15 +50,12 @@ public class BukkitSender implements PearlSender {
     }
 
     @Override
-    public ConsoleCommandSender getBukkitConsole() {
-        if (this.sender instanceof ConsoleCommandSender) {
-            return (ConsoleCommandSender) this.sender;
-        }
-        return null;
+    public CommandSender getBukkitSender() {
+        return this.sender;
     }
 
     @Override
-    public net.md_5.bungee.command.ConsoleCommandSender getProxyConsole() {
+    public net.md_5.bungee.command.ConsoleCommandSender getProxySender() {
         return null;
     }
 }
