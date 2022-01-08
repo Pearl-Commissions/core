@@ -16,25 +16,21 @@ public class NmsManager implements PearlNmsManager {
 
     public NmsManager() {
         String serverVersion = Bukkit.getServer().getVersion();
-        Pattern versionPattern = Pattern.compile("\\(MC: 1.\\d{1,2}\\.\\d\\)");
+        Pattern versionPattern = Pattern.compile("^.+ \\(MC: (1.\\d{1,2})\\.\\d\\)$");
         Matcher matcher = versionPattern.matcher(serverVersion);
-        int start;
-        if (!matcher.find()) {
-            throw new IllegalArgumentException("Cannot get server version from: " + serverVersion);
+        String versionName;
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Cannot match server version from: " + serverVersion);
         } else {
-            start = matcher.start() + 5;
+            versionName = "V" + matcher.toMatchResult().group(1).replaceAll("\\.", "_");
         }
 
-        String implementationVersion = "V" + serverVersion.substring(start, serverVersion.length() - 1).replaceAll("\\.", "_");
-        NmsVersion version = null;
-        for (NmsVersion ver : NmsVersion.values()) {
-            if (implementationVersion.startsWith(ver.name())) {
-                version = ver;
-                break;
-            }
+        NmsVersion version;
+        try {
+            version = NmsVersion.valueOf(versionName);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Cannot find server version: " + versionName);
         }
-
-        if (version == null) throw new IllegalArgumentException("Cannot get server version");
 
         PearlNms<?> nms = Reflection.newInstance(Reflection.forName("fr.pearl.core.spigot.nms." + version.name().toLowerCase() + ".Nms").asSubclass(PearlNms.class));
         this.nmsVersion = version;
