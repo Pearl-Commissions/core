@@ -103,21 +103,31 @@ public class Sidebar implements PearlSidebar {
 
     @Override
     public void updateSlot(int slot) {
+        this.updateSlot(slot, false);
+    }
+
+    @Override
+    public void updateSlot(int slot, boolean global) {
         List<PearlSidebarSlot> list = this.sidebarList.getList();
         if (slot >= list.size()) return;
-        this.updateSlot(list.get(slot));
+        this.updateSlot(list.get(slot), global);
     }
 
     @Override
     public void updateSlot(PearlSidebarSlot slot) {
+        this.updateSlot(slot, false);
+    }
+
+    @Override
+    public void updateSlot(PearlSidebarSlot slot, boolean global) {
         NmsTeam<?> team = slot.getTeam();
         boolean hasUpdater = slot.getUpdater() != null;
-        if (!hasUpdater) {
+        if (!hasUpdater || global) {
             this.setTeamText(slot, team, null);
         }
 
         for (Player viewer : this.getViewers()) {
-            if (hasUpdater) {
+            if (hasUpdater && !global) {
                 this.setTeamText(slot, team, viewer);
             }
             NmsPacketServerScoreboardTeam packetTeam = ServerRegistry.SCOREBOARD_TEAM.getPacket();
