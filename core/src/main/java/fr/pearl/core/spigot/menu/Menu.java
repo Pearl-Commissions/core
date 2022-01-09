@@ -56,7 +56,7 @@ public class Menu implements InventoryHolder, PearlMenu {
     }
 
     @Override
-    public void setItem(int slot, AbstractItem item) {
+    public void setItem(int slot, MenuItem item) {
         itemMap.put(slot, item);
         this.inventory.setItem(slot, item.buildItem());
     }
