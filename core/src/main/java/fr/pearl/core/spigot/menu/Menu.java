@@ -1,6 +1,7 @@
 package fr.pearl.core.spigot.menu;
 
 import fr.pearl.api.spigot.menu.MenuItem;
+import fr.pearl.api.spigot.menu.item.AbstractItem;
 import fr.pearl.api.spigot.menu.MenuHandler;
 import fr.pearl.api.spigot.menu.PearlMenu;
 import org.bukkit.Bukkit;
@@ -55,7 +56,7 @@ public class Menu implements InventoryHolder, PearlMenu {
     }
 
     @Override
-    public void setItem(int slot, MenuItem item) {
+    public void setItem(int slot, AbstractItem item) {
         itemMap.put(slot, item);
         this.inventory.setItem(slot, item.buildItem());
     }
