@@ -5,6 +5,7 @@ import fr.pearl.api.spigot.menu.PearlMenuManager;
 import fr.pearl.api.spigot.nms.PearlNmsManager;
 import fr.pearl.api.spigot.packet.PearlPacketManager;
 import fr.pearl.api.spigot.sidebar.PearlSidebarManager;
+import fr.pearl.api.spigot.tag.PearlTagManager;
 import fr.pearl.core.common.CoreAPI;
 import fr.pearl.core.spigot.listener.ConnectionListener;
 import fr.pearl.core.spigot.listener.MenuListener;
@@ -12,6 +13,7 @@ import fr.pearl.core.spigot.menu.MenuManager;
 import fr.pearl.core.spigot.nms.NmsManager;
 import fr.pearl.core.spigot.packet.PacketManager;
 import fr.pearl.core.spigot.sidebar.SidebarManager;
+import fr.pearl.core.spigot.tag.TagManager;
 import org.bukkit.event.Listener;
 
 import java.util.Arrays;
@@ -22,6 +24,7 @@ public class CoreSpigot extends PearlSpigot {
     private PacketManager packetManager;
     private SidebarManager sidebarManager;
     private MenuManager menuManager;
+    private TagManager tagManager;
 
     @Override
     public void onEnable() {
@@ -33,6 +36,7 @@ public class CoreSpigot extends PearlSpigot {
         this.packetManager = new PacketManager();
         this.sidebarManager = new SidebarManager();
         this.menuManager = new MenuManager();
+        this.tagManager = new TagManager();
 
         // Listeners
         for (Listener listener : Arrays.asList(new MenuListener(), new ConnectionListener())) {
@@ -58,5 +62,10 @@ public class CoreSpigot extends PearlSpigot {
     @Override
     public PearlMenuManager getMenuManager() {
         return this.menuManager;
+    }
+
+    @Override
+    public PearlTagManager getTagManager() {
+        return this.tagManager;
     }
 }
