@@ -1,26 +1,26 @@
-package fr.pearl.core.spigot.menu;
+package fr.pearl.core.spigot.menu.type;
 
 import fr.pearl.api.spigot.menu.MenuItem;
-import fr.pearl.api.spigot.menu.item.AbstractItem;
-import fr.pearl.api.spigot.menu.MenuHandler;
 import fr.pearl.api.spigot.menu.PearlMenu;
+import fr.pearl.api.spigot.menu.handler.SimpleMenuHandler;
+import fr.pearl.api.spigot.menu.type.SimplePearlMenu;
+import fr.pearl.api.spigot.menu.holder.SimpleHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Menu implements InventoryHolder, PearlMenu {
+public class SimpleMenu implements SimpleHolder, SimplePearlMenu {
 
     private final Inventory inventory;
     private final Map<Integer, MenuItem> itemMap = new HashMap<>();
-    private final MenuHandler menu;
+    private final SimpleMenuHandler handler;
 
-    public Menu(MenuHandler menu) {
+    public SimpleMenu(SimpleMenuHandler menu) {
         InventoryType type = menu.inventoryType();
         if (type == InventoryType.CHEST) {
             this.inventory = Bukkit.createInventory(this, menu.lines() * 6, menu.title());
@@ -28,14 +28,14 @@ public class Menu implements InventoryHolder, PearlMenu {
             this.inventory = Bukkit.createInventory(this, type, menu.title());
         }
 
-        this.menu = menu;
-        this.refreshSlots();
+        this.handler = menu;
+        this.refresh();
     }
 
     @Override
-    public void refreshSlots() {
+    public void refresh() {
         this.inventory.clear();
-        for (Map.Entry<Integer, MenuItem> entry : menu.itemMap().entrySet()) {
+        for (Map.Entry<Integer, MenuItem> entry : handler.itemMap().entrySet()) {
             int slot = entry.getKey();
             MenuItem item = entry.getValue();
             this.inventory.setItem(slot, item.buildItem());
@@ -52,7 +52,7 @@ public class Menu implements InventoryHolder, PearlMenu {
     public void open(Player player) {
         player.openInventory(this.getInventory());
         player.updateInventory();
-        this.menu.onOpen(this, player);
+        this.handler.onOpen(this, player);
     }
 
     @Override
@@ -66,7 +66,13 @@ public class Menu implements InventoryHolder, PearlMenu {
         return this.inventory;
     }
 
+    @Override
     public Map<Integer, MenuItem> getItemMap() {
         return itemMap;
+    }
+
+    @Override
+    public PearlMenu getMenu() {
+        return this;
     }
 }
