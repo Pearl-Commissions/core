@@ -11,6 +11,7 @@ import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_10_R1.util.CraftChatMessage;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class Nms implements PearlNms<EntityPlayer> {
 
@@ -49,5 +50,10 @@ public class Nms implements PearlNms<EntityPlayer> {
     @Override
     public Enchantment getGlowEnchant() {
         return new GlowEnchant();
+    }
+
+    @Override
+    public void setUnbreakable(ItemMeta meta, boolean unbreakable) {
+        meta.spigot().setUnbreakable(unbreakable);
     }
 }
