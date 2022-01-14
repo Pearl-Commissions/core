@@ -68,6 +68,10 @@ subprojects { p ->
         exclude 'com/cryptomorin/xseries/XEntity*'
         exclude 'com/cryptomorin/xseries/XBlock*'
         exclude 'org/yaml/snakeyaml/**'
+
+        if (p.name == 'api') {
+            archiveFileName = "PearlAPI-${project.version}.jar"
+        }
     }
 
     artifacts {
