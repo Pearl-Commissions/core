@@ -1,0 +1,15 @@
+plugins {
+    id 'net.minecrell.plugin-yml.bukkit' version '0.5.1'
+    id 'net.minecrell.plugin-yml.bungee' version '0.5.1'
+}
+
+bukkit {
+    main = 'fr.pearl.core.spigot.CoreSpigot'
+    apiVersion = '1.13'
+    author = 'Bramsou'
+}
+
+bungee {
+    main = 'fr.pearl.core.bungee.CoreBungee'
+    author = 'Bramsou'
+}

@@ -12,3 +12,7 @@ dependencies {
     implementation project(':1.16')
     implementation project(':1.17')
 }
+
+shadowJar{
+    archiveFileName = "PearlCore-${project.version}.jar"
+}

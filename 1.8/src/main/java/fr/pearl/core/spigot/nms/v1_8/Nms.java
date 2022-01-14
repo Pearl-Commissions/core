@@ -13,6 +13,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.spigotmc.AntiXray;
 
 public class Nms implements PearlNms<EntityPlayer> {
 
@@ -26,7 +27,6 @@ public class Nms implements PearlNms<EntityPlayer> {
         Channel channel = this.getEntityPlayer(player).playerConnection.networkManager.channel;
         ChannelHandler handler = channel.pipeline().get("pearl-handler");
         if (handler != null) channel.pipeline().remove(handler);
-        ItemStack itemStack = null;
     }
 
     @Override

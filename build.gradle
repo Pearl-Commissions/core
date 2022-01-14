@@ -17,12 +17,14 @@ plugins {
     id 'java'
 }
 
+allprojects {
+    group 'fr.pearl.core'
+    version = property("projectVersion") as String
+}
+
 subprojects { p ->
     apply plugin: 'java'
     apply plugin: 'com.github.johnrengelman.shadow'
-
-    group 'fr.pearl.core'
-    version '1.0-SNAPSHOT'
 
     compileJava.options.encoding = 'UTF-8'
 
