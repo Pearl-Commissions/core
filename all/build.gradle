@@ -1,18 +1,14 @@
 dependencies {
     implementation project(':api')
     implementation project(':core')
-    implementation project(':1.8')
-    implementation project(':1.9')
-    implementation project(':1.10')
-    implementation project(':1.11')
-    implementation project(':1.12')
-    implementation project(':1.13')
-    implementation project(':1.14')
-    implementation project(':1.15')
-    implementation project(':1.16')
-    implementation project(':1.17')
-}
-
-shadowJar{
-    archiveFileName = "PearlCore-${project.version}.jar"
+    implementation project(':core:1.8')
+    implementation project(':core:1.9')
+    implementation project(':core:1.10')
+    implementation project(':core:1.11')
+    implementation project(':core:1.12')
+    implementation project(':core:1.13')
+    implementation project(':core:1.14')
+    implementation project(':core:1.15')
+    implementation project(':core:1.16')
+    implementation project(':core:1.17')
 }

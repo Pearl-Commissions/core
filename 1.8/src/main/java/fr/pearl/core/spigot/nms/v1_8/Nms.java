@@ -6,14 +6,14 @@ import fr.pearl.core.spigot.nms.v1_8.enchant.GlowEnchant;
 import fr.pearl.core.spigot.nms.v1_8.scoreboard.Scoreboard;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
-import net.minecraft.server.v1_8_R3.*;
-import org.bukkit.craftbukkit.v1_8_R3.util.CraftChatMessage;
+import net.minecraft.server.v1_8_R3.EntityPlayer;
+import net.minecraft.server.v1_8_R3.Packet;
+import net.minecraft.server.v1_8_R3.ScoreboardServer;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.util.CraftChatMessage;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.spigotmc.AntiXray;
 
 public class Nms implements PearlNms<EntityPlayer> {
 

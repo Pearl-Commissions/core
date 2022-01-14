@@ -3,3 +3,7 @@ java {
         languageVersion.set(JavaLanguageVersion.of(16))
     }
 }
+
+dependencies {
+    compileOnly name: 'spigot'
+}

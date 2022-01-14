@@ -1,80 +1,19 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-
-    dependencies {
-        classpath "gradle.plugin.com.github.johnrengelman:shadow:7.1.1"
-    }
-}
-
 plugins {
-    id 'java'
+    id 'net.minecrell.plugin-yml.bukkit' version '0.5.1'
+    id 'net.minecrell.plugin-yml.bungee' version '0.5.1'
 }
 
-allprojects {
-    group 'fr.pearl.core'
-    version = property("projectVersion") as String
+bukkit {
+    main = 'fr.pearl.core.spigot.CoreSpigot'
+    apiVersion = '1.13'
+    author = 'Bramsou'
 }
 
-subprojects { p ->
-    apply plugin: 'java'
-    apply plugin: 'com.github.johnrengelman.shadow'
+bungee {
+    main = 'fr.pearl.core.bungee.CoreBungee'
+    author = 'Bramsou'
+}
 
-    compileJava.options.encoding = 'UTF-8'
-
-    repositories {
-        mavenCentral()
-        mavenLocal()
-
-        maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
-        maven { url = 'https://jitpack.io'}
-
-        flatDir {
-            dir "lib"
-        }
-    }
-
-    dependencies {
-        implementation 'org.jetbrains:annotations:20.1.0'
-        implementation 'com.github.cryptomorin:XSeries:8.5.0.1'
-        if (p.name != 'api') {
-            implementation project(':api')
-            if (p.name != 'all' && p.name != 'core') {
-                implementation project(':core')
-                compileOnly name: 'spigot'
-            } else {
-                compileOnly files('../lib/bungee.jar')
-                compileOnly 'org.spigotmc:spigot-api:1.17-R0.1-SNAPSHOT'
-            }
-        } else {
-            compileOnly files('../lib/bungee.jar')
-            compileOnly 'org.spigotmc:spigot-api:1.17-R0.1-SNAPSHOT'
-        }
-    }
-
-    shadowJar {
-        exclude 'com/cryptomorin/xseries/unused/**'
-        exclude 'com/cryptomorin/xseries/messages/*'
-        exclude 'com/cryptomorin/xseries/XBiome*'
-        exclude 'com/cryptomorin/xseries/NMSExtras*'
-        exclude 'com/cryptomorin/xseries/NoteBlockMusic*'
-        exclude 'com/cryptomorin/xseries/SkullUtils*'
-        exclude 'com/cryptomorin/xseries/XEntity*'
-        exclude 'com/cryptomorin/xseries/XBlock*'
-        exclude 'org/yaml/snakeyaml/**'
-
-        if (p.name == 'api') {
-            archiveFileName = "PearlAPI-${project.version}.jar"
-        }
-    }
-
-    artifacts {
-        archives shadowJar
-    }
+dependencies {
+    compileOnly project(':api')
 }

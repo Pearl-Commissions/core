@@ -1,0 +1,4 @@
+name: core
+main: fr.pearl.core.bungee.CoreBungee
+version: 1.0.0
+author: Bramsou
