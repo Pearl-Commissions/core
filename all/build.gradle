@@ -1,3 +1,9 @@
+shadowJar {
+    archiveBaseName.set('PearlCore')
+    archiveClassifier.set('')
+    archiveVersion.set(coreVersion)
+}
+
 dependencies {
     implementation project(':api')
     implementation project(':core')

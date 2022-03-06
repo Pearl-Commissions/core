@@ -23,7 +23,7 @@ public class SimpleMenu implements SimpleHolder, SimplePearlMenu {
     public SimpleMenu(SimpleMenuHandler menu) {
         InventoryType type = menu.inventoryType();
         if (type == InventoryType.CHEST) {
-            this.inventory = Bukkit.createInventory(this, menu.lines() * 6, menu.title());
+            this.inventory = Bukkit.createInventory(this, menu.lines() * 9, menu.title());
         } else {
             this.inventory = Bukkit.createInventory(this, type, menu.title());
         }
@@ -51,8 +51,8 @@ public class SimpleMenu implements SimpleHolder, SimplePearlMenu {
 
     public void open(Player player) {
         player.openInventory(this.getInventory());
-        player.updateInventory();
         this.handler.onOpen(this, player);
+        player.updateInventory();
     }
 
     @Override

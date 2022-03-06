@@ -9,8 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 public class ConnectionListener implements Listener {
 
@@ -23,15 +21,5 @@ public class ConnectionListener implements Listener {
         NmsPacketServerScoreboardObjective createObjective = ServerRegistry.SCOREBOARD_OBJECTIVE.getPacket();
         createObjective.setObjective(objective);
         createObjective.send(player);
-    }
-
-    @EventHandler
-    public void onQuit(PlayerQuitEvent event) {
-        PearlSpigot.getInstance().getNmsManager().getNms().removeChannel(event.getPlayer(), "pearl-handler");
-    }
-
-    @EventHandler
-    public void onKick(PlayerKickEvent event) {
-        PearlSpigot.getInstance().getNmsManager().getNms().removeChannel(event.getPlayer(), "pearl-handler");
     }
 }

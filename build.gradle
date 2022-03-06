@@ -6,12 +6,16 @@ plugins {
 bukkit {
     main = 'fr.pearl.core.spigot.CoreSpigot'
     apiVersion = '1.13'
+    version = coreVersion
     author = 'Bramsou'
+    name = 'PearlCore'
 }
 
 bungee {
     main = 'fr.pearl.core.bungee.CoreBungee'
+    version = coreVersion
     author = 'Bramsou'
+    name = 'PearlCore'
 }
 
 dependencies {

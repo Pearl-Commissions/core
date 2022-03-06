@@ -1,4 +1,4 @@
-name: core
+name: PearlCore
 main: fr.pearl.core.bungee.CoreBungee
-version: unspecified
+version: 1.0.2
 author: Bramsou
